@@ -1,12 +1,63 @@
 <template>
-  <div >
-    设置表头
+  <div>
+    <toolNav></toolNav>
+
     <main class="home">
       <div class="drag ">
-        组件
+        <el-collapse accordion v-model="activeName">
+          <el-collapse-item name="1">
+            <template slot="title">
+              构图组件
+            </template>
+            <div>
+              <layoutDragTool />
+            </div>
+          </el-collapse-item>
+          <el-collapse-item title="基础组件" name="2">
+            <baseDragTool></baseDragTool>
+          </el-collapse-item>
+        </el-collapse>
       </div>
       <div class="canvas ">
-        画布
+        <div class="pc">
+          <draggable
+            class="drag-area list-group"
+            :list="widgetList"
+            group="layout"
+            @choose="handleLayoutChoose"
+            @change="handleLayoutChange"
+          >
+            <div
+              :class="[
+                'list-layout-item',
+                { 'is-layout-actived': activeLayoutIndex === index },
+              ]"
+              v-for="(item, index) in widgetList"
+              :key="index"
+              @click="getTableIndex(item, index)"
+            >
+              <p v-if="index">关联表单索引:{{ index }}</p>
+              <p v-if="index === 0">主表单</p>
+              <component v-bind:is="item.type" :payload="item.children">
+                <!-- 控件(插槽中的内容) -->
+                <template v-slot="props" v-if="item.children">
+                  <strong style="color:red">id:{{ props.data }}</strong>
+                  <div v-for="(tr, trIndex) in item.children" :key="trIndex">
+                    <div v-for="(td, tdIndex) in tr.rowCells" :key="tdIndex">
+                      <div
+                        v-if="tr.rowIndex + '|' + td.colIndex === props.data"
+                        @click="getActiveIndex(tr, td, index)"
+                      >
+
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </component>
+            </div>
+          </draggable>
+        </div>
+        <rawDisplayer :value="widgetList" :title="`json`" />
       </div>
       <div class="control ">
         属性
@@ -14,11 +65,85 @@
     </main>
   </div>
 </template>
-
 <script>
+import toolNav from '@/components/toolNav.vue'
+import baseDragTool from '../components/dragelement/baseDragTool'
+// import WidgetTable from '@/components/WidgetTable/index.vue'
+// import WidgetTableConfig from '@/components/WidgetTable/config.vue'
+import layoutDragTool from '@/components/dragelement/layoutDragTool'
+// 业务控件
+// import { cloneObjectFn } from '@/utils'
 export default {
   name: 'Home',
-  components: {}
+  components: {
+    toolNav,
+    baseDragTool,
+    layoutDragTool
+    // WidgetTable
+    // WidgetTableConfig
+  },
+  data () {
+    return {
+      activeName: '2',
+      activeLayoutIndex: 0, // 当前选中布局控件的索引
+      activeIndex: '0|0', // 当前选中控件的索引
+      rowIndex: 0, // 当前选中控件的行索引(数据结构真实位置)
+      colIndex: 0, // 当前选中控件的列索引(数据结构真实位置)
+      widgetList: [], // pageinfo,
+      subProcessList: []
+
+    }
+  },
+  computed: {
+    // ---------------------------------------------------布局控件
+    // 当前选中布局控件的目标对象
+    // activeWidgetLayoutObj () {
+    //   if (!this.widgetList.length) return {}
+    //   const obj = cloneObjectFn(
+    //     this.widgetList[this.activeLayoutIndex] || null
+    //   )
+    //   return obj
+    // },
+    // // 当前选中布局控件的目标的payload对象
+    // activeWidgetLayoutPayload () {
+    //   if (!this.activeWidgetLayoutObj) return {}
+    //   const obj = cloneObjectFn(this.activeWidgetLayoutObj.payload || null)
+    //   return obj
+    // },
+    // // 当前选中布局控件的目标类型
+    // activeWidgetLayoutConfigType () {
+    //   if (!this.activeWidgetLayoutObj) return null
+    //   return this.activeWidgetLayoutObj.type + '-config'
+    // }
+
+  },
+  mounted () {
+    this.finishConfig()
+  },
+  methods: {
+    // 获取布局控件的索引
+    getTableIndex (item, index) {
+      this.activeLayoutIndex = index
+    },
+
+    handleLayoutChoose (cEvt) {
+      this.activeLayoutIndex = cEvt.oldIndex
+    },
+    // // 拖拽布局控件
+    handleLayoutChange (evt) {
+      if (evt.moved) {
+        this.activeLayoutIndex = evt.moved.newIndex
+      }
+      if (evt.added) {
+        this.activeLayoutIndex = evt.added.newIndex
+        // 再次拖拽表单的时候，需要把行列焦点重新设置，因为上个焦点的位置可能大于当前拖拽的
+        this.rowIndex = 0
+        this.colIndex = 0
+      }
+    },
+
+    finishConfig () {}
+  }
 }
 </script>
 <style lang="scss">
@@ -103,25 +228,53 @@ body {
 //   background: #7e7979;
 // }
 //-------------第四种方法 flex布局
-.home{
+.home {
   display: flex;
   justify-content: space-between;
 }
-.drag{
-
+.drag {
   width: 200px;
- height: 100vh;
-  background:#c49d9d;
+  height: 100vh;
+  background: #c49d9d;
 }
-.control{
-
-width: 200px;
- height: 100vh;
-  background:#c49d9d;
+.control {
+  width: 200px;
+  height: 100vh;
+  background: #c49d9d;
 }
-.canvas{
+.canvas {
   height: 100vh;
   width: 100%;
   background: #7e7979;
+  .pc {
+    display: block;
+    margin: auto;
+    background: url("~@/assets/pc-box.png") no-repeat;
+    background-size: cover;
+    height: 700px;
+    width: 100%;
+    // border:1px solid red;
+    padding: 50px 5px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: content-box;
+    p {
+      color: red;
+    }
+    .drag-area {
+      margin: 0 auto;
+      width: 1080px;
+      height: 620px;
+      overflow: auto;
+      // flex: 1;
+      .list-group-item {
+        width: 100%;
+      }
+      .list-layout-item {
+        margin-bottom: 20px;
+        width: 100%;
+      }
+    }
+  }
 }
 </style>
