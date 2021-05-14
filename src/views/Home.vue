@@ -39,9 +39,11 @@
               <p v-if="index">关联表单索引:{{ index }}</p>
               <p v-if="index === 0">主表单</p>
               <component v-bind:is="item.type" :payload="item.children">
+
                 <!-- 控件(插槽中的内容) -->
-                <template v-slot="props" v-if="item.children">
-                  <strong style="color:red">id:{{ props.data }}</strong>
+                <!-- <template v-slot="props" v-if="item.children"> -->
+                    {{item.children}}
+                  <!-- <strong style="color:red">id:{{ props.data }}</strong>
                   <div v-for="(tr, trIndex) in item.children" :key="trIndex">
                     <div v-for="(td, tdIndex) in tr.rowCells" :key="tdIndex">
                       <div
@@ -51,8 +53,8 @@
 
                       </div>
                     </div>
-                  </div>
-                </template>
+                  </div> -->
+                <!-- </template> -->
               </component>
             </div>
           </draggable>
@@ -68,7 +70,7 @@
 <script>
 import toolNav from '@/components/toolNav.vue'
 import baseDragTool from '../components/dragelement/baseDragTool'
-// import WidgetTable from '@/components/WidgetTable/index.vue'
+import WidgetTable from '@/components/WidgetTable/index.vue'
 // import WidgetTableConfig from '@/components/WidgetTable/config.vue'
 import layoutDragTool from '@/components/dragelement/layoutDragTool'
 // 业务控件
@@ -78,8 +80,8 @@ export default {
   components: {
     toolNav,
     baseDragTool,
-    layoutDragTool
-    // WidgetTable
+    layoutDragTool,
+    WidgetTable
     // WidgetTableConfig
   },
   data () {
