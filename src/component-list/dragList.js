@@ -11,82 +11,54 @@ export const commonAttr = {
   isLock: false // 是否锁定组件
 }
 
-// 编辑器左侧组件列表
-const list = [
+export const dragList = [
   {
-    component: 'v-text',
-    label: '文字',
-    propValue: '双击编辑文字',
-    icon: 'edit',
-    style: {
-      width: 200,
-      height: 22,
-      fontSize: 14,
-      fontWeight: 500,
-      lineHeight: '',
-      letterSpacing: 0,
-      textAlign: '',
-      color: ''
+    title: '标签',
+    type: 'widget-text',
+    payload: {
+      name: '',
+      notes: '标签',
+      text: 'text',
+      level: 'h3',
+      isBlock: '1'
     }
   },
   {
-    component: 'v-button',
-    label: '按钮',
-    propValue: '按钮',
-    icon: 'button',
-    style: {
-      width: 100,
-      height: 34,
-      borderWidth: 1,
-      borderColor: '',
-      borderRadius: '',
-      fontSize: 14,
-      fontWeight: 500,
-      lineHeight: '',
-      letterSpacing: 0,
-      textAlign: '',
-      color: '',
-      backgroundColor: ''
+    title: '输入框',
+    type: 'widget-input',
+    payload: {
+      name: 'widget-input',
+      inputType: 'text',
+      rule: '',
+      defaultValueRadio: 'none',
+      defaultValue: '',
+      orderFilter: '0',
+      listShow: '0'
     }
   },
   {
-    component: 'Picture',
-    label: '图片',
-    icon: 'tupian',
-    propValue: require('@/assets/logo.png'),
-    style: {
-      width: 300,
-      height: 200,
-      borderRadius: ''
+    title: '单选框',
+    type: 'widget-radio',
+    payload: {
+      name: 'widget-radio',
+      acount: 2,
+      defaultValue: '',
+      orderFilter: '0',
+      listShow: '0',
+      list: [{ name: '选项名称1' }, { name: '选项名称2' }]
     }
   },
   {
-    component: 'rect-shape',
-    label: '矩形',
-    propValue: '&nbsp;',
-    icon: 'juxing',
-    style: {
-      width: 200,
-      height: 200,
-      fontSize: 14,
-      fontWeight: 500,
-      lineHeight: '',
-      letterSpacing: 0,
-      textAlign: 'center',
-      color: '',
-      borderColor: '#000',
-      borderWidth: 1,
-      backgroundColor: '',
-      borderStyle: 'solid',
-      verticalAlign: 'middle'
+    title: '下拉框',
+    type: 'widget-select',
+    payload: {
+      name: 'widget-select',
+      acount: 2,
+      defaultValue: '',
+      orderFilter: '0',
+      listShow: '0',
+      isAssociateForm: '0',
+      list: [{ name: '选项名称1' }, { name: '选项名称2' }]
     }
   }
 ]
-
-for (let i = 0, len = list.length; i < len; i++) {
-  const item = list[i]
-  item.style = { ...commonStyle, ...item.style }
-  list[i] = { ...commonAttr, ...item }
-}
-
-export default list

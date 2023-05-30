@@ -36,14 +36,15 @@
               :key="index"
               @click="getTableIndex(item, index)"
             >
+
               <p v-if="index">关联表单索引:{{ index }}</p>
               <p v-if="index === 0">主表单</p>
               <component v-bind:is="item.type" :payload="item.children">
 
                 <!-- 控件(插槽中的内容) -->
-                <!-- <template v-slot="props" v-if="item.children"> -->
-                    {{item.children}}
-                  <!-- <strong style="color:red">id:{{ props.data }}</strong>
+                <template v-slot="props" v-if="item.children">
+                    <!-- {{item.children}} -->
+                  <strong style="color:red">id:{{ props.data }}</strong>
                   <div v-for="(tr, trIndex) in item.children" :key="trIndex">
                     <div v-for="(td, tdIndex) in tr.rowCells" :key="tdIndex">
                       <div
@@ -51,10 +52,21 @@
                         @click="getActiveIndex(tr, td, index)"
                       >
 
+                      <draggable
+                      style="height:60px;"
+                      :list="td.component"
+                        :group="td.component.length === 0 ?'widget':'no'"
+                        @change="handleChange(tr.rowIndex,td.colIndex,index)"
+                        :draggable="false">
+                        <div :class="['list-group-item', { 'is-actived': activeLayoutIndex === index &&activeIndex === props.data } ]"
+                          v-for="(e, i) in td.component" :key="i">
+                          <component  style="width:100%" v-bind:is="e.type" :ref="'widget' + i" :payload="e.payload" ></component>
+                        </div>
+                      </draggable>
                       </div>
                     </div>
-                  </div> -->
-                <!-- </template> -->
+                  </div>
+                </template>
               </component>
             </div>
           </draggable>
@@ -69,8 +81,9 @@
 </template>
 <script>
 import toolNav from '@/components/toolNav.vue'
-import baseDragTool from '../components/dragelement/baseDragTool'
+import baseDragTool from '@/components/dragelement/baseDragTool'
 import WidgetTable from '@/components/WidgetTable/index.vue'
+import WidgetText from '@/components/WidgetText/index.vue'
 // import WidgetTableConfig from '@/components/WidgetTable/config.vue'
 import layoutDragTool from '@/components/dragelement/layoutDragTool'
 // 业务控件
@@ -81,7 +94,8 @@ export default {
     toolNav,
     baseDragTool,
     layoutDragTool,
-    WidgetTable
+    WidgetTable,
+    WidgetText
     // WidgetTableConfig
   },
   data () {
@@ -131,6 +145,19 @@ export default {
     handleLayoutChoose (cEvt) {
       this.activeLayoutIndex = cEvt.oldIndex
     },
+    // 拖拽获取当前数组中的索引
+    handleChange (rowIndex, colIndex, layoutIndex) {
+      this.activeLayoutIndex = layoutIndex
+      this.activeIndex = rowIndex + '|' + colIndex
+      const trueRowIndex = this.widgetList[this.activeLayoutIndex].children.findIndex(item => {
+        return item.rowIndex === rowIndex
+      })
+      const trueColIndex = this.widgetList[this.activeLayoutIndex].children[trueRowIndex].rowCells.findIndex(item => {
+        return item.colIndex === colIndex
+      })
+      this.rowIndex = trueRowIndex
+      this.colIndex = trueColIndex
+    },
     // // 拖拽布局控件
     handleLayoutChange (evt) {
       if (evt.moved) {
@@ -143,7 +170,22 @@ export default {
         this.colIndex = 0
       }
     },
-
+    // 获取内嵌组件的位置
+    getActiveIndex (tr, td, layoutIndex) {
+      this.activeLayoutIndex = layoutIndex
+      if (td.component.length) {
+        // 拖拽的真实的索引
+        const trueRowIndex = this.widgetList[this.activeLayoutIndex].children.findIndex(item => {
+          return item.rowIndex === tr.rowIndex
+        })
+        const trueColIndex = this.widgetList[this.activeLayoutIndex].children[trueRowIndex].rowCells.findIndex(item => {
+          return item.colIndex === td.colIndex
+        })
+        this.rowIndex = trueRowIndex
+        this.colIndex = trueColIndex
+        this.activeIndex = tr.rowIndex + '|' + td.colIndex
+      }
+    },
     finishConfig () {}
   }
 }
